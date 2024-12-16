@@ -2,42 +2,57 @@ from random import uniform
 from math import sqrt, erf, exp, pi
 from scipy.special import erfinv
 
-class Actor:
-    def __init__(self, svo, sd, svo_delta, w, group):
-        if svo > 1.0 or svo < 0.0:
+
+class GroupDescription:
+    def __init__(self, num_actors, svo, sd, svo_delta, w, name):
+        if num_actors <= 0 and not isinstance(num_actors, int):
+            raise ValueError(f"num_actors ({num_actors}) mus tbe an integer grater than 0.")
+        elif svo > 1.0 or svo < 0.0:
             raise ValueError(f"svo ({svo}) is out of range. Expected 0 <= svo <= 1")
         elif sd > 1.0 or sd <= 0.0:
             raise ValueError(f"sd ({sd}) is out of range. Expected 0 < sd <= 1")
         elif svo_delta > 1.0 or svo_delta < 0.0:
             raise ValueError(f"svo_delta ({svo_delta}) is out of range. Expected 0 <= svo_delta <= 1")
         elif svo != 0.0 and svo_delta != 0.0:
-            raise ValueError(f"Actor is pro self (given svo = {svo}), therefore their svo cannot change (given svo_delta = {svo_delta}).")
+            raise ValueError(f"Actors are not 100% pro social (given svo = {svo}), therefore their svo cannot change (however, given svo_delta = {svo_delta}).")
         elif w > 2.0 or w <= 0.0:
             raise ValueError(f"w ({w}) is out of range. Expected 0 < w <= 2")
-
         
+        self.num_actors = num_actors
+        self.svo = svo
+        self.sd = sd
+        self.svo_delta = svo_delta
+        self.w = w
+        self.name = name
+    
+    def __str__(self):
+        return f"num_actors:{self.num_actors}|svo:{self.svo}|sd:{self.sd}|svo_delta:{self.svo_delta}|w:{self.w}|name:{self.group_name}"
+
+
+class Actor:
+    def __init__(self, group_description):        
         #social value orientation
         # 0 <= svo <= 1
         # svo = 0     => 100% pro social
         # svo = 0.5   => 50% pro self, 50% pro social
         # svo = 1     => 100% pro self
-        self.svo = svo
+        self.svo = group_description.svo
 
         #stadard deviation of normal distribution
         # 0 < sd <= 1
-        self.sd = sd
+        self.sd = group_description.sd
 
         #change in svo
         # 0 <= svo_delta <= 1
         # this is only non zero, if the actor is initially 100% pro social
-        self.svo_delta = svo_delta
+        self.svo_delta = group_description.svo_delta
 
         #width of the range used to calculate probability of voting
         # 0 < w <= 2
-        self.w = w
+        self.w = group_description.w
 
         #used to indicate which group an actor belongs to
-        self.group = group
+        self.group_name = group_description.name
 
 
     #probability density function
@@ -80,7 +95,7 @@ class Actor:
         # where the 1st number indicates to what degree it benefits everyone versus a group
         # and the 2nd number indicates which group the preference is towards.
         # i.e magnitude and direction
-        proposal_vec = (proposal_svo, self.group)
+        proposal_vec = (proposal_svo, self.group_name)
 
         return proposal_vec
     
@@ -96,7 +111,7 @@ class Actor:
 
         #if the proposal doesn't benefit the actor's group, it benefit's another group
         # thus it's svo is negative not positive
-        if proposal_vec[1] != self.group:
+        if proposal_vec[1] != self.group_name:
             proposal_svo *= -1
         
         #calcultes the probability fo voting for this policy
@@ -110,8 +125,4 @@ class Actor:
         return vote
     
     def __str__(self):
-        return f"svo:{self.svo}|sd:{self.sd}|svo_delta:{self.svo_delta}|w:{self.w}|group:{self.group}"
-
-
-
-        
+        return f"svo:{self.svo}|sd:{self.sd}|svo_delta:{self.svo_delta}|w:{self.w}|group:{self.group_name}"
