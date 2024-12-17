@@ -105,7 +105,7 @@ class Actor:
         
         return vote_prob
 
-
+    #returns true/false if the actor votes ro doesnt for the proposed policy
     def gen_vote(self, proposal_vec):
         proposal_svo = proposal_vec[0]
 
@@ -124,5 +124,10 @@ class Actor:
 
         return vote
     
+    #adjusts svo if actor doesn't vote for a policy
+    def adjust_svo(self, proposal_svo):
+        self.svo += self.svo_delta * (1.0 - (2 * exp(-((proposal_svo)**2) / (2 * (self.sd ** 2)))))
+        self.svo = max(0.0, min(self.svo, 1.0))
+    
     def __str__(self):
-        return f"svo:{self.svo}|sd:{self.sd}|svo_delta:{self.svo_delta}|w:{self.w}|group:{self.group_name}"
+        return f"svo:{self.svo:.2f}|sd:{self.sd:.2f}|svo_delta:{self.svo_delta:.2f}|w:{self.w:.2f}|group:{self.group_name}"
