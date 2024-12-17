@@ -4,7 +4,7 @@ from scipy.special import erfinv
 
 
 class GroupDescription:
-    def __init__(self, num_actors, svo, sd, svo_delta, w, name):
+    def __init__(self, num_actors, svo, sd, svo_delta, name):
         if num_actors <= 0 and not isinstance(num_actors, int):
             raise ValueError(f"num_actors ({num_actors}) mus tbe an integer grater than 0.")
         elif svo > 1.0 or svo < 0.0:
@@ -15,18 +15,15 @@ class GroupDescription:
             raise ValueError(f"svo_delta ({svo_delta}) is out of range. Expected 0 <= svo_delta <= 1")
         elif svo != 0.0 and svo_delta != 0.0:
             raise ValueError(f"Actors are not 100% pro social (given svo = {svo}), therefore their svo cannot change (however, given svo_delta = {svo_delta}).")
-        elif w > 2.0 or w <= 0.0:
-            raise ValueError(f"w ({w}) is out of range. Expected 0 < w <= 2")
         
         self.num_actors = num_actors
         self.svo = svo
         self.sd = sd
         self.svo_delta = svo_delta
-        self.w = w
         self.name = name
     
     def __str__(self):
-        return f"num_actors:{self.num_actors}|svo:{self.svo}|sd:{self.sd}|svo_delta:{self.svo_delta}|w:{self.w}|name:{self.group_name}"
+        return f"num_actors:{self.num_actors}|svo:{self.svo}|sd:{self.sd}|svo_delta:{self.svo_delta}|name:{self.group_name}"
 
 
 class Actor:
@@ -46,10 +43,6 @@ class Actor:
         # 0 <= svo_delta <= 1
         # this is only non zero, if the actor is initially 100% pro social
         self.svo_delta = group_description.svo_delta
-
-        #width of the range used to calculate probability of voting
-        # 0 < w <= 2
-        self.w = group_description.w
 
         #used to indicate which group an actor belongs to
         self.group_name = group_description.name
@@ -130,4 +123,4 @@ class Actor:
         self.svo = max(0.0, min(self.svo, 1.0))
     
     def __str__(self):
-        return f"svo:{self.svo:.2f}|sd:{self.sd:.2f}|svo_delta:{self.svo_delta:.2f}|w:{self.w:.2f}|group:{self.group_name}"
+        return f"svo:{self.svo:.2f}|sd:{self.sd:.2f}|svo_delta:{self.svo_delta:.2f}|group:{self.group_name}"

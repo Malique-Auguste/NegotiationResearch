@@ -22,7 +22,12 @@ class Log:
             else:
                 output += "rejected: "
             
-            output += f"{self.votes}\r\n{self.state_summary}\r\ntimestamp: {self.timestamp:.2f}"
+            output += f"{self.votes}\r\n"
+            
+            for summary in self.state_summary:
+                output += f"{summary[0]}|num_actors:{len(summary[1])}|avg_svo:{summary[2]:.2f}\r\n"
+            
+            output += f"timestamp: {self.timestamp:.2f}"
         
         return output
 
@@ -109,7 +114,7 @@ class Population:
         self.logs.append(Log(self.get_avg_svo(), proposal_vec, votes, self.summarize_state()))
 
     def summarize_state(self):
-        output = ""
+        output = []
 
         for group_name, group_actors in self.inner.items():
             avg_svo = 0
@@ -119,9 +124,7 @@ class Population:
             
             avg_svo /= len(group_actors)
 
-            output += f"{group_name}|num_actors:{len(group_actors)}|avg_svo:{avg_svo:.2f}\r\n"
-
-        output = output.strip()
+            output.append((group_name, len(group_actors), avg_svo))
         
         return output
 
